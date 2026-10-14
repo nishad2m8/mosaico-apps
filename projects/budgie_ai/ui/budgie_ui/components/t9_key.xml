@@ -1,0 +1,23 @@
+<!--
+ @title T9 key
+ @brief One phone-keypad key: the letters large in the middle, the digit small in the corner.
+        Tapping it calls chat_t9_key_cb with the digit as user data; the multi-tap logic is in src/budgie_chat.c.
+-->
+<component>
+	<api>
+		<prop name="digit" type="string" default="2"/>
+		<prop name="letters" type="string" default="abc"/>
+	</api>
+
+	<previews>
+		<preview name="light" width="140" height="80" style_bg_color="#color_bg" style_bg_opa="255" style_pad_all="16"/>
+	</previews>
+
+	<view extends="lv_button" width="108" height="47" click_focusable="false">
+		<style name="style_key"/>
+		<style name="style_key_pressed" selector="pressed"/>
+		<lv_label name="letters_label" text="$letters" align="center" style_text_font="font_bubble_title" style_text_color="#color_text"/>
+		<lv_label name="digit_label" text="$digit" align="top_right" x="-8" y="3" style_text_font="font_key_digit" style_text_color="#color_muted"/>
+		<event_cb callback="chat_t9_key_cb" trigger="clicked" user_data="$digit"/>
+	</view>
+</component>

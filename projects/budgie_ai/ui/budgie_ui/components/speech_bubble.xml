@@ -1,0 +1,95 @@
+<!--
+ @title Speech bubble
+ @brief Rounded bubble with a bold first line and a muted second line,
+        and a small tail on the top edge (left side) pointing up at the speaker.
+-->
+<component>
+	<api>
+		<prop name="title" type="string" default="Hi! I'm Budgie." />
+		<prop name="text" type="string" default="How can I help you today?" />
+	</api>
+
+	<previews>
+		<preview
+			name="light"
+			width="360"
+			height="130"
+			style_bg_color="#color_bg"
+			style_bg_opa="255"
+			style_pad_all="20"
+		/>
+	</previews>
+
+	<styles>
+		<style
+			name="style_bubble_shape"
+			bg_opa="255"
+			bg_color="#color_bubble_bg"
+			border_width="1"
+			border_color="#color_bubble_border"
+		/>
+	</styles>
+
+	<!-- Root is transparent; the body is inset 10px from the top so the tail fits inside the root (LVGL clips
+	     transformed children to the parent). The tail is drawn first, so the body covers its inner half. -->
+	<view
+		extends="lv_obj"
+		width="300"
+		height="content"
+		scrollable="false"
+		style_bg_opa="0"
+		style_border_width="0"
+		style_pad_all="0"
+		style_radius="0"
+	>
+		<!-- Tail: a 14x14 square turned 45 degrees, centered on the body's top edge (y=10), 88px from the left
+		     so it points up at the budgie (clear of the 32px corner radius) -->
+		<lv_obj
+			name="tail"
+			width="14"
+			height="14"
+			align="top_left"
+			x="40"
+			y="3"
+			scrollable="false"
+			clickable="false"
+			style_radius="2"
+			style_transform_rotation="450"
+			style_transform_pivot_x="7"
+			style_transform_pivot_y="7"
+		>
+			<style name="style_bubble_shape" />
+		</lv_obj>
+
+		<lv_obj
+			name="body"
+			y="10"
+			width="100%"
+			height="content"
+			scrollable="false"
+			clickable="false"
+			style_radius="32"
+			style_pad_hor="20"
+			style_pad_ver="14"
+			style_pad_row="4"
+			style_layout="flex"
+			style_flex_flow="column"
+			style_flex_cross_place="center"
+			style_flex_track_place="center"
+		>
+			<style name="style_bubble_shape" />
+			<lv_label
+				name="title_label"
+				text="$title"
+				style_text_font="font_bubble_title"
+				style_text_color="#color_text"
+			/>
+			<lv_label
+				name="text_label"
+				text="$text"
+				style_text_font="font_bubble_text"
+				style_text_color="#color_muted"
+			/>
+		</lv_obj>
+	</view>
+</component>

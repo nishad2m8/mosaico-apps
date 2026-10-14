@@ -1,0 +1,130 @@
+<!--
+ @title Camera
+ @brief Take a photo and send it to Budgie. Created when opened from home and deleted on the way back.
+
+ subject_photo_taken: 0 = live preview, 1 = photo captured.
+   - The shutter captures (sets 1). Delete (x, left of the shutter) discards the photo (sets 0).
+   - Delete and Send are disabled until a photo is captured. Sending returns home with Budgie in thinking mode.
+ subject_camera_origin says where Back and Send go: home (Send -> Budgie thinks about the photo) or
+ chat (Send -> attach the photo to the message). Each of those buttons exists once per origin and
+ only the matching one is shown.
+ The app draws the camera feed / captured photo into the "viewfinder" object.
+-->
+<screen>
+	<styles>
+		<style name="style_cam_round" radius="999" pad_all="0" bg_opa="190" bg_color="#color_cam_overlay"
+			border_width="0" shadow_width="0" outline_width="0"/>
+		<style name="style_cam_round_pressed" bg_opa="255"/>
+		<style name="style_cam_round_disabled" opa="90"/>
+		<!-- Back: same as the chat screen's (transparent, tinted circle while pressed), white arrow for the dark background -->
+		<style name="style_icon_btn" radius="999" pad_all="0" bg_opa="0" border_width="0" shadow_width="0" outline_width="0"/>
+		<style name="style_icon_btn_pressed" bg_opa="40" bg_color="0xffffff"/>
+		<!-- Shutter: white disc inside a white ring with a 5px gap -->
+		<style name="style_shutter" radius="999" pad_all="0" bg_opa="255" bg_color="0xffffff" border_width="0" shadow_width="0"
+			outline_width="4" outline_pad="5" outline_color="0xffffff" outline_opa="255"/>
+		<style name="style_shutter_pressed" bg_color="0xdfe5f0"/>
+		<style name="style_corner" bg_opa="255" bg_color="0xffffff" border_width="0" radius="2" pad_all="0"/>
+		<style name="style_hint" text_font="font_body" text_color="0xffffff" text_opa="210"/>
+	</styles>
+
+	<view style_bg_color="#color_cam_bg" style_bg_opa="255" style_pad_all="0" scrollable="false">
+		<!-- Camera feed / captured photo is drawn here by the app -->
+		<lv_obj name="viewfinder" width="100%" height="100%" scrollable="false" clickable="false"
+			style_bg_opa="0" style_border_width="0" style_pad_all="0" style_radius="0"/>
+
+		<!-- Framing guide (live preview only): four corner brackets around a 216x216 square, clear of the hint text -->
+		<lv_obj name="frame" width="216" height="216" align="center" y="-36" scrollable="false" clickable="false"
+			style_bg_opa="0" style_border_width="0" style_pad_all="0">
+			<bind_flag_if_eq subject="subject_photo_taken" flag="hidden" ref_value="1"/>
+			<lv_obj width="32" height="4" align="top_left"><style name="style_corner"/></lv_obj>
+			<lv_obj width="4" height="32" align="top_left"><style name="style_corner"/></lv_obj>
+			<lv_obj width="32" height="4" align="top_right"><style name="style_corner"/></lv_obj>
+			<lv_obj width="4" height="32" align="top_right"><style name="style_corner"/></lv_obj>
+			<lv_obj width="32" height="4" align="bottom_left"><style name="style_corner"/></lv_obj>
+			<lv_obj width="4" height="32" align="bottom_left"><style name="style_corner"/></lv_obj>
+			<lv_obj width="32" height="4" align="bottom_right"><style name="style_corner"/></lv_obj>
+			<lv_obj width="4" height="32" align="bottom_right"><style name="style_corner"/></lv_obj>
+		</lv_obj>
+
+		<!-- "Photo captured" chip (captured only) -->
+		<lv_obj name="captured_chip" width="content" height="content" align="top_mid" y="74" scrollable="false" clickable="false"
+			style_bg_opa="220" style_bg_color="#color_cam_overlay" style_border_width="0" style_radius="999"
+			style_pad_hor="14" style_pad_ver="6" style_pad_column="8"
+			style_layout="flex" style_flex_flow="row" style_flex_cross_place="center">
+			<bind_flag_if_eq subject="subject_photo_taken" flag="hidden" ref_value="0"/>
+			<lv_obj width="10" height="10" style_bg_opa="255" style_bg_color="#color_btn_end" style_border_width="0" style_radius="999"/>
+			<lv_label text="Photo captured" style_text_font="font_body" style_text_color="0xffffff"/>
+		</lv_obj>
+
+		<!-- Header: back + title (same placement as the chat screen). One back button per origin. -->
+		<lv_button name="back_btn" width="44" height="44" x="8" y="6" ext_click_area="6">
+			<style name="style_icon_btn"/>
+			<style name="style_icon_btn_pressed" selector="pressed"/>
+			<bind_flag_if_not_eq subject="subject_camera_origin" flag="hidden" ref_value="#origin_home"/>
+			<lv_image src="img_icon_back_light" align="center"/>
+			<subject_set_int_event subject="subject_photo_taken" value="0"/>
+			<screen_load_event screen="home" anim_type="move_right" duration="250"/>
+		</lv_button>
+		<lv_button name="back_btn_chat" width="44" height="44" x="8" y="6" ext_click_area="6">
+			<style name="style_icon_btn"/>
+			<style name="style_icon_btn_pressed" selector="pressed"/>
+			<bind_flag_if_not_eq subject="subject_camera_origin" flag="hidden" ref_value="#origin_chat"/>
+			<lv_image src="img_icon_back_light" align="center"/>
+			<subject_set_int_event subject="subject_photo_taken" value="0"/>
+			<screen_load_event screen="chat" anim_type="fade_in" duration="200"/>
+		</lv_button>
+		<lv_label text="Camera" align="top_mid" y="16" style_text_font="font_status" style_text_color="0xffffff"/>
+
+		<!-- Hint above the controls, one per state -->
+		<lv_label text="Point at something and tap the shutter" align="bottom_mid" y="-124">
+			<style name="style_hint"/>
+			<bind_flag_if_eq subject="subject_photo_taken" flag="hidden" ref_value="1"/>
+		</lv_label>
+		<lv_label text="Looks good? Tap send, or x to delete" align="bottom_mid" y="-124">
+			<style name="style_hint"/>
+			<bind_flag_if_eq subject="subject_photo_taken" flag="hidden" ref_value="0"/>
+		</lv_label>
+
+		<!-- Delete (left): discards the captured photo; disabled until a photo is captured -->
+		<lv_button name="delete_btn" width="60" height="60" align="bottom_mid" x="-132" y="-42">
+			<style name="style_cam_round"/>
+			<style name="style_cam_round_pressed" selector="pressed"/>
+			<style name="style_cam_round_disabled" selector="disabled"/>
+			<bind_state_if_eq subject="subject_photo_taken" state="disabled" ref_value="0"/>
+			<lv_image src="img_icon_close" align="center"/>
+			<subject_set_int_event subject="subject_photo_taken" value="0"/>
+		</lv_button>
+
+		<!-- Shutter (center): capture -->
+		<lv_button name="shutter_btn" width="68" height="68" align="bottom_mid" y="-38">
+			<style name="style_shutter"/>
+			<style name="style_shutter_pressed" selector="pressed"/>
+			<subject_set_int_event subject="subject_photo_taken" value="1"/>
+		</lv_button>
+
+		<!-- Send (right): disabled until a photo is captured. One per origin:
+		     from home it goes back with Budgie thinking; from chat it attaches the photo to the message. -->
+		<lv_button name="send_btn" width="60" height="60" align="bottom_mid" x="132" y="-42">
+			<style name="style_round_btn"/>
+			<style name="style_round_btn_pressed" selector="pressed"/>
+			<style name="style_round_btn_disabled" selector="disabled"/>
+			<bind_flag_if_not_eq subject="subject_camera_origin" flag="hidden" ref_value="#origin_home"/>
+			<bind_state_if_eq subject="subject_photo_taken" state="disabled" ref_value="0"/>
+			<lv_image src="img_icon_send_large" align="center"/>
+			<subject_set_int_event subject="subject_photo_taken" value="0"/>
+			<subject_set_int_event subject="subject_budgie_mode" value="#mode_thinking"/>
+			<screen_load_event screen="home" anim_type="fade_in" duration="200"/>
+		</lv_button>
+		<lv_button name="send_btn_chat" width="60" height="60" align="bottom_mid" x="132" y="-42">
+			<style name="style_round_btn"/>
+			<style name="style_round_btn_pressed" selector="pressed"/>
+			<style name="style_round_btn_disabled" selector="disabled"/>
+			<bind_flag_if_not_eq subject="subject_camera_origin" flag="hidden" ref_value="#origin_chat"/>
+			<bind_state_if_eq subject="subject_photo_taken" state="disabled" ref_value="0"/>
+			<lv_image src="img_icon_send_large" align="center"/>
+			<subject_set_int_event subject="subject_chat_has_photo" value="1"/>
+			<subject_set_int_event subject="subject_photo_taken" value="0"/>
+			<screen_load_event screen="chat" anim_type="fade_in" duration="200"/>
+		</lv_button>
+	</view>
+</screen>

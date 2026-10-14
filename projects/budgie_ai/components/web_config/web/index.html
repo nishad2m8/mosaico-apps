@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Budgie Setup</title>
+<style>
+  :root {
+    --bg: #f3f5fa; --card: #ffffff; --text: #0f1f3d; --muted: #6b7590;
+    --border: #c9d6f2; --track: #e3e8f3; --blue: #5b7ff5; --teal: #5fd0c2;
+    --danger: #d64545; --ok: #2f9e74;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  header { padding: 22px 16px 8px; text-align: center; }
+  header h1 { margin: 0; font-size: 26px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { max-width: 640px; margin: 0 auto; padding: 8px 16px 48px; }
+  .section { margin: 18px 0 6px 8px; font-size: 12px; letter-spacing: 1px; color: var(--muted); font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; }
+  .row { padding: 12px 0; border-bottom: 1px solid var(--track); }
+  .row:last-child { border-bottom: 0; }
+  .row.inline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 3px; }
+  input[type=text], input[type=password], input[type=number], select, textarea {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 14px;
+    font: inherit; color: var(--text); background: #f8faff; }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--blue); outline-offset: 0; }
+  input[type=range] { width: 100%; accent-color: var(--blue); }
+  .btn { border: 0; border-radius: 999px; padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer;
+    color: #fff; background: linear-gradient(90deg, var(--blue), var(--teal)); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: var(--track); color: var(--text); }
+  .btn.danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .switch { position: relative; width: 52px; height: 30px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--track); transition: .2s; }
+  .switch span::before { content: ""; position: absolute; width: 24px; height: 24px; left: 3px; top: 3px;
+    border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(74,85,120,.4); transition: .2s; }
+  .switch input:checked + span { background: linear-gradient(90deg, var(--blue), var(--teal)); }
+  .switch input:checked + span::before { transform: translateX(22px); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; background: var(--track); }
+  .pill.ok { background: #dff5ec; color: var(--ok); }
+  .pill.bad { background: #fdeeee; color: var(--danger); }
+  .nets { list-style: none; margin: 8px 0 0; padding: 0; max-height: 220px; overflow: auto; }
+  .nets li { padding: 9px 12px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; }
+  .nets li:hover { background: var(--track); }
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: #fff;
+    padding: 10px 18px; border-radius: 999px; opacity: 0; transition: opacity .25s; pointer-events: none; max-width: 90vw; }
+  #toast.show { opacity: 1; }
+  .save-bar { position: sticky; bottom: 12px; margin-top: 18px; display: flex; justify-content: center; }
+  .save-bar .btn { padding: 12px 34px; box-shadow: 0 6px 18px rgba(91,127,245,.35); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Budgie</h1>
+  <p>Voice chat AI assistant &middot; setup</p>
+</header>
+<main>
+  <div class="section">STATUS</div>
+  <div class="card">
+    <div class="row inline"><span>Wi-Fi</span><span id="st-wifi" class="pill">&hellip;</span></div>
+    <div class="row inline"><span>AI service</span><span id="st-ai" class="pill">&hellip;</span></div>
+    <div class="row inline"><span>Battery</span><span id="st-batt" class="pill">&hellip;</span></div>
+    <div class="row inline"><span>Firmware</span><span id="st-ver" class="pill">&hellip;</span></div>
+  </div>
+
+  <div class="section">WI-FI</div>
+  <div class="card">
+    <div class="row">
+      <label for="wifi-ssid">Network</label>
+      <input id="wifi-ssid" type="text" maxlength="32" autocomplete="off" placeholder="Network name">
+      <ul id="nets" class="nets"></ul>
+    </div>
+    <div class="row">
+      <label for="wifi-pass">Password</label>
+      <input id="wifi-pass" type="password" maxlength="64" autocomplete="off" placeholder="Leave empty for open networks">
+    </div>
+    <div class="row btns">
+      <button class="btn ghost" id="btn-scan">Scan</button>
+      <button class="btn" id="btn-wifi">Connect</button>
+    </div>
+  </div>
+
+  <div class="section">AI CHAT (OPENAI-COMPATIBLE)</div>
+  <div class="card">
+    <div class="row">
+      <label for="preset">Provider</label>
+      <select id="preset">
+        <option value="">Custom</option>
+        <option value="openai">OpenAI</option>
+        <option value="openrouter">OpenRouter</option>
+        <option value="groq">Groq</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="ollama">Ollama (local network)</option>
+        <option value="lmstudio">LM Studio (local network)</option>
+      </select>
+      <div class="hint">Fills in the base URL and suggested models. Everything stays editable.</div>
+    </div>
+    <div class="row">
+      <label for="api_base_url">Base URL</label>
+      <input id="api_base_url" type="text" maxlength="191" placeholder="https://api.openai.com/v1">
+      <div class="hint">Requests go to &lt;base&gt;/chat/completions.</div>
+    </div>
+    <div class="row">
+      <label for="api_key">API key <span id="api_key_state" class="pill"></span></label>
+      <input id="api_key" type="password" maxlength="223" autocomplete="off" placeholder="Leave empty to keep the saved key">
+      <div class="hint">Stored on the device only; never shown again. <a href="#" id="clear-key">Remove saved key</a></div>
+    </div>
+    <div class="row">
+      <label for="chat_model">Model</label>
+      <input id="chat_model" type="text" maxlength="63" list="models">
+      <datalist id="models"></datalist>
+      <div class="btns" style="margin-top:8px"><button class="btn ghost" id="btn-test">Test &amp; load models</button></div>
+    </div>
+    <div class="row">
+      <label for="vision_model">Vision model (camera photos)</label>
+      <input id="vision_model" type="text" maxlength="63" list="models" placeholder="Same as Model">
+      <div class="hint">Used when a photo is attached. It must accept images, e.g. gpt-4o-mini (OpenAI)
+        or qwen/qwen3.8-27b (Groq).</div>
+    </div>
+    <div class="row">
+      <label for="system_prompt">Personality (system prompt)</label>
+      <textarea id="system_prompt" maxlength="1000"></textarea>
+    </div>
+    <div class="row grid2">
+      <div>
+        <label for="temperature_x10">Creativity <span id="temp-val" class="pill"></span></label>
+        <input id="temperature_x10" type="range" min="0" max="20">
+      </div>
+      <div>
+        <label for="max_tokens">Max reply tokens</label>
+        <input id="max_tokens" type="number" min="16" max="4096">
+      </div>
+    </div>
+    <div class="row">
+      <label for="history_turns">Memory (exchanges remembered) <span id="hist-val" class="pill"></span></label>
+      <input id="history_turns" type="range" min="0" max="16">
+    </div>
+  </div>
+
+  <div class="section">VOICE</div>
+  <div class="card">
+    <div class="row grid2">
+      <div>
+        <label for="stt_model">Speech-to-text model</label>
+        <input id="stt_model" type="text" maxlength="63" placeholder="whisper-1">
+      </div>
+      <div>
+        <label for="stt_language">Language hint</label>
+        <input id="stt_language" type="text" maxlength="7" placeholder="auto (e.g. en)">
+      </div>
+    </div>
+    <div class="row inline">
+      <div><label>Speak replies</label><div class="hint">Text-to-speech through the speaker</div></div>
+      <label class="switch"><input id="tts_enabled" type="checkbox"><span></span></label>
+    </div>
+    <div class="row grid2">
+      <div>
+        <label for="tts_model">Text-to-speech model</label>
+        <input id="tts_model" type="text" maxlength="63" placeholder="gpt-4o-mini-tts">
+      </div>
+      <div>
+        <label for="tts_voice">Voice</label>
+        <input id="tts_voice" type="text" maxlength="31" list="voices" placeholder="alloy">
+        <div class="hint">Must match the provider: OpenAI uses alloy, nova...; Groq Orpheus uses autumn, diana, hannah, austin, daniel, troy.</div>
+        <datalist id="voices"><option>alloy</option><option>ash</option><option>coral</option><option>echo</option>
+          <option>fable</option><option>nova</option><option>onyx</option><option>sage</option><option>shimmer</option>
+          <option value="autumn">autumn (Groq Orpheus)</option><option value="diana">diana (Groq Orpheus)</option>
+          <option value="hannah">hannah (Groq Orpheus)</option><option value="austin">austin (Groq Orpheus)</option>
+          <option value="daniel">daniel (Groq Orpheus)</option><option value="troy">troy (Groq Orpheus)</option></datalist>
+      </div>
+    </div>
+    <div class="row">
+      <label for="speech_base_url">Speech base URL (optional)</label>
+      <input id="speech_base_url" type="text" maxlength="191" placeholder="Same as chat">
+      <div class="hint">Use a different OpenAI-compatible host for /audio/transcriptions and /audio/speech.</div>
+    </div>
+    <div class="row">
+      <label for="speech_api_key">Speech API key (optional) <span id="speech_api_key_state" class="pill"></span></label>
+      <input id="speech_api_key" type="password" maxlength="223" autocomplete="off" placeholder="Same as chat">
+    </div>
+  </div>
+
+  <div class="section">DEVICE</div>
+  <div class="card">
+    <div class="row">
+      <label for="title">Title</label>
+      <input id="title" type="text" maxlength="16" placeholder="Budgie">
+      <div class="hint">Shown in the middle of the status bar. About 6 characters fit; longer titles end in "...".</div>
+    </div>
+    <div class="row">
+      <label for="subtitle">Subtitle</label>
+      <input id="subtitle" type="text" maxlength="40" placeholder="Leave empty to hide">
+      <div class="hint">A short line under the status bar on the home screen.</div>
+    </div>
+    <div class="row">
+      <label for="volume">Volume <span id="vol-val" class="pill"></span></label>
+      <input id="volume" type="range" min="0" max="100">
+    </div>
+    <div class="row">
+      <label for="brightness">Brightness <span id="bri-val" class="pill"></span></label>
+      <input id="brightness" type="range" min="10" max="100">
+    </div>
+    <div class="row">
+      <label for="screen_timeout">Screen off after</label>
+      <select id="screen_timeout">
+        <option value="0">30 seconds</option><option value="1">1 minute</option>
+        <option value="2">5 minutes</option><option value="3">Never</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="clock_format">Time format</label>
+      <select id="clock_format">
+        <option value="0">12-hour (2:30 PM)</option><option value="1">24-hour (14:30)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="timezone">Time zone (POSIX TZ)</label>
+      <input id="timezone" type="text" maxlength="47" list="zones" placeholder="UTC0">
+      <datalist id="zones">
+        <option value="UTC0">UTC</option>
+        <option value="GMT0BST,M3.5.0/1,M10.5.0">London</option>
+        <option value="CET-1CEST,M3.5.0,M10.5.0/3">Berlin / Paris</option>
+        <option value="EST5EDT,M3.2.0,M11.1.0">New York</option>
+        <option value="PST8PDT,M3.2.0,M11.1.0">Los Angeles</option>
+        <option value="&lt;+04&gt;-4">Dubai</option>
+        <option value="IST-5:30">India</option>
+        <option value="CST-8">China</option>
+        <option value="JST-9">Tokyo</option>
+        <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Sydney</option>
+      </datalist>
+      <div class="hint">Used for the clock in the status bar.</div>
+    </div>
+    <div class="row inline">
+      <div><label>Chirp sounds</label><div class="hint">Little bird sounds when listening and replying</div></div>
+      <label class="switch"><input id="chirps" type="checkbox"><span></span></label>
+    </div>
+    <div class="row inline">
+      <div><label>Kid-safe answers</label><div class="hint">Simpler, family-friendly replies</div></div>
+      <label class="switch"><input id="kid_safe" type="checkbox"><span></span></label>
+    </div>
+  </div>
+
+  <div class="save-bar"><button class="btn" id="btn-save">Save settings</button></div>
+
+  <div class="section">TRY IT</div>
+  <div class="card">
+    <div class="row">
+      <label for="chat-text">Ask Budgie</label>
+      <input id="chat-text" type="text" maxlength="500" placeholder="The answer appears (and is spoken) on the device">
+    </div>
+    <div class="row btns"><button class="btn" id="btn-chat">Send</button></div>
+  </div>
+
+  <div class="section">MAINTENANCE</div>
+  <div class="card">
+    <div class="row btns">
+      <button class="btn ghost" data-action="clear_history">Clear chat memory</button>
+      <button class="btn ghost" data-action="reboot">Restart</button>
+      <button class="btn ghost" data-action="vibe_mode">Restart into Vibe Mode</button>
+      <button class="btn danger" data-action="factory_reset">Reset all settings</button>
+    </div>
+    <div class="row hint">Vibe Mode is the built-in update/maintenance firmware. Holding Boot while powering
+      on enters ROM Download Mode instead; neither is affected by these settings.</div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const FIELDS = {
+  text: ["api_base_url", "chat_model", "vision_model", "system_prompt", "stt_model", "stt_language", "tts_model",
+         "tts_voice", "speech_base_url", "timezone", "title", "subtitle"],
+  secret: ["api_key", "speech_api_key"],
+  number: ["max_tokens", "temperature_x10", "history_turns", "volume", "brightness", "screen_timeout", "clock_format"],
+  bool: ["tts_enabled", "chirps", "kid_safe"],
+};
+const PRESETS = {
+  openai: { url: "https://api.openai.com/v1", chat: "gpt-4o-mini", vision: "gpt-4o-mini", stt: "whisper-1",
+            tts: "gpt-4o-mini-tts",
+            voice: "alloy" },
+  openrouter: { url: "https://openrouter.ai/api/v1", chat: "openai/gpt-4o-mini" },
+  groq: { url: "https://api.groq.com/openai/v1", chat: "llama-3.1-8b-instant", vision: "qwen/qwen3.8-27b",
+          stt: "whisper-large-v3-turbo",
+          tts: "canopylabs/orpheus-v1-english", voice: "troy" },
+  deepseek: { url: "https://api.deepseek.com/v1", chat: "deepseek-chat" },
+  ollama: { url: "http://192.168.1.10:11434/v1", chat: "llama3.2" },
+  lmstudio: { url: "http://192.168.1.10:1234/v1", chat: "local-model" },
+};
+let clearKey = false;
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+async function api(path, body) {
+  const opts = body === undefined ? {} :
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text() || r.statusText);
+  return r.json();
+}
+
+function pill(el, text, cls) {
+  el.textContent = text;
+  el.className = "pill" + (cls ? " " + cls : "");
+}
+
+function bindValue(id, out, fmt) {
+  const update = () => { $(out).textContent = fmt($(id).value); };
+  $(id).addEventListener("input", update);
+  return update;
+}
+const valueLabels = [
+  bindValue("temperature_x10", "temp-val", (v) => (v / 10).toFixed(1)),
+  bindValue("history_turns", "hist-val", (v) => v),
+  bindValue("volume", "vol-val", (v) => v + "%"),
+  bindValue("brightness", "bri-val", (v) => v + "%"),
+];
+
+async function loadStatus() {
+  try {
+    const s = await api("/api/status");
+    const w = s.wifi;
+    if (w.state === "connected") pill($("st-wifi"), `${w.ssid} · ${w.ip}`, "ok");
+    else if (w.state === "connecting") pill($("st-wifi"), `Connecting to ${w.ssid}…`);
+    else pill($("st-wifi"), w.ap_active ? `Setup network ${w.ap_ssid}` : "Not connected", "bad");
+    pill($("st-ai"), s.ai_ready ? "Configured" : "Needs API key", s.ai_ready ? "ok" : "bad");
+    pill($("st-batt"), s.battery < 0 ? "Unknown" : `${s.battery}%${s.charging ? " · charging" : ""}`);
+    pill($("st-ver"), "v" + s.version);
+  } catch (e) { /* device may be switching networks */ }
+}
+
+async function loadConfig() {
+  const c = await api("/api/config");
+  FIELDS.text.forEach((k) => { $(k).value = c[k] ?? ""; });
+  FIELDS.number.forEach((k) => { $(k).value = c[k]; });
+  FIELDS.bool.forEach((k) => { $(k).checked = !!c[k]; });
+  FIELDS.secret.forEach((k) => {
+    $(k).value = "";
+    pill($(k + "_state"), c[k + "_set"] ? "saved" : "not set", c[k + "_set"] ? "ok" : "");
+  });
+  $("wifi-ssid").value = c.wifi_ssid || "";
+  valueLabels.forEach((f) => f());
+}
+
+function collect() {
+  const body = {};
+  FIELDS.text.forEach((k) => { body[k] = $(k).value.trim(); });
+  FIELDS.number.forEach((k) => { body[k] = Number($(k).value); });
+  FIELDS.bool.forEach((k) => { body[k] = $(k).checked; });
+  FIELDS.secret.forEach((k) => { const v = $(k).value.trim(); if (v) body[k] = v; });
+  if (clearKey) body.api_key_clear = true;
+  return body;
+}
+
+$("preset").addEventListener("change", () => {
+  const p = PRESETS[$("preset").value];
+  if (!p) return;
+  $("api_base_url").value = p.url;
+  $("chat_model").value = p.chat;
+  $("vision_model").value = p.vision || "";
+  if (p.stt) $("stt_model").value = p.stt;
+  if (p.tts) $("tts_model").value = p.tts;
+  if (p.voice) $("tts_voice").value = p.voice;
+  if (!p.tts) toast("This provider may not offer text-to-speech; set a speech URL or turn speaking off.");
+});
+
+$("clear-key").addEventListener("click", (e) => {
+  e.preventDefault();
+  clearKey = true;
+  $("api_key").value = "";
+  pill($("api_key_state"), "will be removed on save", "bad");
+});
+
+$("btn-save").addEventListener("click", async () => {
+  try {
+    const r = await api("/api/config", collect());
+    if (!r.ok) throw new Error(r.error);
+    clearKey = false;
+    toast("Saved");
+    await loadConfig();
+    loadStatus();
+  } catch (e) { toast("Save failed: " + e.message); }
+});
+
+$("btn-test").addEventListener("click", async () => {
+  const b = $("btn-test");
+  b.disabled = true;
+  try {
+    const r = await api("/api/test", collect());
+    if (!r.ok) throw new Error(r.error);
+    $("models").innerHTML = "";
+    (r.models || []).forEach((m) => { const o = document.createElement("option"); o.value = m; $("models").appendChild(o); });
+    toast(`Connected: ${(r.models || []).length} models available`);
+  } catch (e) { toast("Test failed: " + e.message); }
+  b.disabled = false;
+});
+
+$("btn-scan").addEventListener("click", async () => {
+  const b = $("btn-scan");
+  b.disabled = true;
+  $("nets").innerHTML = "<li>Scanning…</li>";
+  try {
+    const list = await api("/api/wifi/scan");
+    $("nets").innerHTML = "";
+    list.forEach((n) => {
+      const li = document.createElement("li");
+      const name = document.createElement("span");
+      name.textContent = n.ssid;
+      const meta = document.createElement("span");
+      meta.className = "hint";
+      meta.textContent = `${n.secure ? "🔒 " : ""}${n.rssi} dBm`;
+      li.append(name, meta);
+      li.onclick = () => { $("wifi-ssid").value = n.ssid; $("wifi-pass").focus(); };
+      $("nets").appendChild(li);
+    });
+    if (!list.length) $("nets").innerHTML = "<li>No networks found</li>";
+  } catch (e) { $("nets").innerHTML = ""; toast("Scan failed"); }
+  b.disabled = false;
+});
+
+$("btn-wifi").addEventListener("click", async () => {
+  const ssid = $("wifi-ssid").value.trim();
+  if (!ssid) { toast("Enter a network name"); return; }
+  try {
+    const r = await api("/api/wifi", { ssid, password: $("wifi-pass").value });
+    if (!r.ok) throw new Error(r.error);
+    toast("Connecting… the device shows its new address when ready");
+    $("wifi-pass").value = "";
+    setTimeout(loadStatus, 4000);
+  } catch (e) { toast("Wi-Fi failed: " + e.message); }
+});
+
+$("btn-chat").addEventListener("click", async () => {
+  const text = $("chat-text").value.trim();
+  if (!text) return;
+  try {
+    const r = await api("/api/chat", { text });
+    if (!r.ok) throw new Error(r.error);
+    $("chat-text").value = "";
+    toast("Sent — look at Budgie!");
+  } catch (e) { toast(e.message); }
+});
+
+document.querySelectorAll("[data-action]").forEach((b) => b.addEventListener("click", async () => {
+  const action = b.dataset.action;
+  const confirmText = {
+    reboot: "Restart Budgie now?",
+    vibe_mode: "Restart into Vibe Mode (update/maintenance firmware)?",
+    factory_reset: "Erase all settings, including Wi-Fi and API keys?",
+  }[action];
+  if (confirmText && !confirm(confirmText)) return;
+  try {
+    await api("/api/action", { action });
+    toast(action === "clear_history" ? "Chat memory cleared" : "Done");
+  } catch (e) { toast("Failed: " + e.message); }
+}));
+
+$("chat-text").addEventListener("keydown", (e) => { if (e.key === "Enter") $("btn-chat").click(); });
+
+loadConfig().catch(() => toast("Could not load settings"));
+loadStatus();
+setInterval(loadStatus, 5000);
+</script>
+</body>
+</html>

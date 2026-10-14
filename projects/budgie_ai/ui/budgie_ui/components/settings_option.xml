@@ -1,0 +1,33 @@
+<!--
+ @title Settings option
+ @brief One segment of a settings_choice. Checked while `subject` equals `value`; tapping it sets the subject.
+        Shares the row with its siblings (flex_grow) and draws the pill-shaped track itself.
+-->
+<component>
+	<api>
+		<prop name="text" type="string" default="Normal"/>
+		<prop name="subject" type="subject" default="subject_screen_timeout"/>
+		<prop name="value" type="int" default="1"/>
+	</api>
+
+	<styles>
+		<style name="style_option" radius="999" pad_all="0" bg_opa="255" bg_color="#color_track" border_width="0"
+			shadow_width="0" outline_width="0" text_font="font_row_title" text_color="#color_muted"/>
+		<style name="style_option_checked" bg_color="#color_btn_start" bg_grad_color="#color_btn_end" bg_grad_dir="hor"
+			text_color="0xffffff" shadow_width="10" shadow_opa="70" shadow_color="#color_btn_start" shadow_offset_y="2"/>
+		<style name="style_option_pressed" bg_color="#color_key_pressed"/>
+	</styles>
+
+	<previews>
+		<preview name="light" width="160" height="70" style_bg_color="#color_card" style_bg_opa="255" style_pad_all="16"/>
+	</previews>
+
+	<view extends="lv_button" flex_grow="1" height="40" click_focusable="false">
+		<style name="style_option"/>
+		<style name="style_option_pressed" selector="pressed"/>
+		<style name="style_option_checked" selector="checked"/>
+		<bind_state_if_eq subject="$subject" state="checked" ref_value="$value"/>
+		<subject_set_int_event subject="$subject" value="$value"/>
+		<lv_label name="option_label" text="$text" align="center"/>
+	</view>
+</component>

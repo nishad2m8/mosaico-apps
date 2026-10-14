@@ -1,0 +1,166 @@
+<!--
+ @title Chat
+ @brief Type to Budgie with a T9 keypad: Budgie's answer on top, the message being typed below it
+        (with a camera button to attach a photo), then the keypad.
+        Permanent, so the typed message survives a trip to the camera.
+
+ Attaching a photo: the camera button opens the camera with subject_camera_origin = chat. Its Send
+ sets subject_chat_has_photo = 1 and returns here; the camera button is then replaced by a photo
+ tile with a small x to remove it. Send sends the text and/or the photo, then clears the attachment.
+
+ Named widgets used by src/budgie_chat.c: "response" (answer label), "chat_input" (text area),
+ "photo_tile" (visible while a photo is attached), "case_label" and "mode_label" (abc/ABC and 123 keys).
+-->
+<screen permanent="true">
+	<styles>
+		<style name="style_icon_btn" radius="999" pad_all="0" bg_opa="0" border_width="0" shadow_width="0" outline_width="0"/>
+		<style name="style_icon_btn_pressed" bg_opa="255" bg_color="#color_key_pressed"/>
+		<style name="style_card" radius="20" bg_opa="255" bg_color="#color_card" border_width="1" border_color="#color_bubble_border"/>
+		<style name="style_key_text" text_font="font_bubble_title" text_color="#color_text"/>
+		<!-- Placeholder ("Type a message...") in the muted grey -->
+		<style name="style_placeholder" text_color="#color_muted"/>
+		<!-- Thin bar cursor in the brand blue -->
+		<style name="style_bar_cursor" bg_opa="0" border_side="left" border_width="2" border_color="#color_btn_start"/>
+	</styles>
+
+	<view style_bg_color="#color_bg" style_bg_opa="255" style_pad_all="0" scrollable="false">
+		<!-- Resets the conversation when "Clear chat history" was used in Settings -->
+		<event_cb callback="chat_screen_load_cb" trigger="screen_load_start"/>
+
+		<!-- Header: back to home + title -->
+		<lv_button name="back_btn" width="44" height="44" x="8" y="6" ext_click_area="6">
+			<style name="style_icon_btn"/>
+			<style name="style_icon_btn_pressed" selector="pressed"/>
+			<lv_image src="img_icon_back" align="center"/>
+			<screen_load_event screen="home" anim_type="move_right" duration="250"/>
+		</lv_button>
+		<lv_label text="Chat with Budgie" align="top_mid" y="16" style_text_font="font_status" style_text_color="#color_text"/>
+
+		<!-- Response area: Budgie's latest answer, scrolls when long -->
+		<lv_obj name="response_card" x="16" y="60" width="448" height="132" scrollable="false"
+			style_pad_all="12" style_pad_column="12" style_layout="flex" style_flex_flow="row">
+			<style name="style_card"/>
+			<lv_image src="img_budgie_avatar"/>
+			<lv_obj name="response_scroll" flex_grow="1" height="100%" scrollbar_mode="auto"
+				style_bg_opa="0" style_border_width="0" style_pad_all="0" style_pad_top="4">
+				<!-- Keep this greeting in sync with CHAT_GREETING in src/budgie_chat.c -->
+				<lv_label name="response" width="100%" long_mode="wrap"
+					text="Hi! Type your message on the keypad and tap Send. I'll answer here."
+					style_text_font="font_bubble_text" style_text_color="#color_text" style_text_line_space="4"/>
+			</lv_obj>
+		</lv_obj>
+
+		<!-- Preview: the message being typed (focused so the cursor shows), with the photo button on its right -->
+		<lv_textarea name="chat_input" x="16" y="200" width="392" height="48" one_line="true" focused="true"
+			placeholder_text="Type a message..."
+			style_radius="24" style_bg_opa="255" style_bg_color="#color_card" style_border_width="1"
+			style_border_color="#color_bubble_border" style_pad_hor="18" style_pad_ver="12"
+			style_text_font="font_bubble_text" style_text_color="#color_text">
+			<style name="style_placeholder" selector="textarea_placeholder"/>
+			<style name="style_bar_cursor" selector="cursor|focused"/>
+		</lv_textarea>
+
+		<!-- Camera: attach a photo (shown while nothing is attached). No ring, so it stays clear of the keypad. -->
+		<lv_button name="attach_btn" x="416" y="200" width="48" height="48" click_focusable="false"
+			style_outline_width="0" style_shadow_width="12" style_shadow_offset_y="3">
+			<style name="style_round_btn"/>
+			<style name="style_round_btn_pressed" selector="pressed"/>
+			<bind_flag_if_eq subject="subject_chat_has_photo" flag="hidden" ref_value="1"/>
+			<lv_image src="img_icon_camera_small" align="center"/>
+			<subject_set_int_event subject="subject_photo_taken" value="0"/>
+			<subject_set_int_event subject="subject_camera_origin" value="#origin_chat"/>
+			<screen_create_event screen="camera" anim_type="fade_in" duration="200"/>
+		</lv_button>
+
+		<!-- Attached photo: tile in place of the camera button, with a small x badge to remove it.
+		     The app can show the real thumbnail by setting the "photo_thumb" image source. -->
+		<lv_obj name="photo_tile" x="416" y="200" width="48" height="48" scrollable="false" clickable="false"
+			style_radius="14" style_border_width="0" style_pad_all="0"
+			style_bg_opa="255" style_bg_color="#color_btn_start" style_bg_grad_color="#color_btn_end" style_bg_grad_dir="hor">
+			<bind_flag_if_eq subject="subject_chat_has_photo" flag="hidden" ref_value="0"/>
+			<lv_image name="photo_thumb" src="img_icon_photo" align="center"/>
+		</lv_obj>
+		<lv_button name="photo_remove_btn" x="450" y="192" width="22" height="22" ext_click_area="8" click_focusable="false"
+			style_radius="999" style_pad_all="0" style_bg_opa="255" style_bg_color="#color_text"
+			style_border_width="2" style_border_color="#color_bg" style_shadow_width="0" style_outline_width="0">
+			<bind_flag_if_eq subject="subject_chat_has_photo" flag="hidden" ref_value="0"/>
+			<lv_image src="img_icon_close_small" align="center"/>
+			<subject_set_int_event subject="subject_chat_has_photo" value="0"/>
+		</lv_button>
+
+		<!-- T9 keypad: 4 columns x 4 rows of 108x47 keys with 8px gaps. Keys are not click-focusable so the text area keeps focus (and its cursor). -->
+		<lv_obj name="keypad" x="12" y="256" width="456" height="212" scrollable="false"
+			style_bg_opa="0" style_border_width="0" style_pad_all="0" style_pad_row="8" style_pad_column="8"
+			style_layout="flex" style_flex_flow="row_wrap">
+			<t9_key digit="1" letters=".,?!"/>
+			<t9_key digit="2" letters="abc"/>
+			<t9_key digit="3" letters="def"/>
+			<lv_button name="backspace_key" click_focusable="false" width="108" height="47">
+				<style name="style_key"/>
+				<style name="style_key_fn"/>
+				<style name="style_key_pressed" selector="pressed"/>
+				<lv_image src="img_icon_backspace" align="center"/>
+				<event_cb callback="chat_backspace_cb" trigger="clicked"/>
+				<event_cb callback="chat_backspace_cb" trigger="long_pressed_repeat"/>
+			</lv_button>
+
+			<t9_key digit="4" letters="ghi"/>
+			<t9_key digit="5" letters="jkl"/>
+			<t9_key digit="6" letters="mno"/>
+			<lv_button name="case_key" click_focusable="false" width="108" height="47">
+				<style name="style_key"/>
+				<style name="style_key_fn"/>
+				<style name="style_key_pressed" selector="pressed"/>
+				<lv_label name="case_label" text="abc" align="center">
+					<style name="style_key_text"/>
+				</lv_label>
+				<event_cb callback="chat_case_cb" trigger="clicked"/>
+			</lv_button>
+
+			<t9_key digit="7" letters="pqrs"/>
+			<t9_key digit="8" letters="tuv"/>
+			<t9_key digit="9" letters="wxyz"/>
+			<lv_button name="mode_key" click_focusable="false" width="108" height="47">
+				<style name="style_key"/>
+				<style name="style_key_fn"/>
+				<style name="style_key_pressed" selector="pressed"/>
+				<lv_label name="mode_label" text="123" align="center">
+					<style name="style_key_text"/>
+				</lv_label>
+				<event_cb callback="chat_mode_cb" trigger="clicked"/>
+			</lv_button>
+
+			<lv_button name="space_key" click_focusable="false" width="224" height="47">
+				<style name="style_key"/>
+				<style name="style_key_pressed" selector="pressed"/>
+				<lv_label text="space" align="center">
+					<style name="style_key_text"/>
+				</lv_label>
+				<lv_label text="0" align="top_right" x="-8" y="3" style_text_font="font_key_digit" style_text_color="#color_muted"/>
+				<event_cb callback="chat_space_cb" trigger="clicked"/>
+			</lv_button>
+			<lv_button name="clear_key" click_focusable="false" width="108" height="47">
+				<style name="style_key"/>
+				<style name="style_key_fn"/>
+				<style name="style_key_pressed" selector="pressed"/>
+				<lv_label text="Clear" align="center">
+					<style name="style_key_text"/>
+				</lv_label>
+				<event_cb callback="chat_clear_cb" trigger="clicked"/>
+			</lv_button>
+			<lv_button name="send_key" click_focusable="false" width="108" height="47" style_radius="14" style_outline_width="0" style_shadow_width="12" style_shadow_offset_y="3">
+				<style name="style_round_btn"/>
+				<style name="style_round_btn_pressed" selector="pressed"/>
+				<lv_obj width="content" height="content" align="center" clickable="false" scrollable="false"
+					style_bg_opa="0" style_border_width="0" style_pad_all="0" style_pad_column="6"
+					style_layout="flex" style_flex_flow="row" style_flex_cross_place="center">
+					<lv_label text="Send" style_text_font="font_bubble_title" style_text_color="0xffffff"/>
+					<lv_image src="img_icon_send"/>
+				</lv_obj>
+				<!-- chat_send_cb runs first (it checks whether a photo is attached), then the attachment is cleared -->
+				<event_cb callback="chat_send_cb" trigger="clicked"/>
+				<subject_set_int_event subject="subject_chat_has_photo" value="0"/>
+			</lv_button>
+		</lv_obj>
+	</view>
+</screen>

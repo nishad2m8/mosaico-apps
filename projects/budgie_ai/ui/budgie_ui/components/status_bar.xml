@@ -1,0 +1,145 @@
+<!--
+ @title Status bar
+ @brief Top bar: wifi strength + clock on the left, brand in the center,
+        battery with a live fill bar + percentage and a settings gear on the right.
+
+ Data comes from globals.xml subjects:
+   subject_wifi_level  0..3  (0 = all bars dimmed)
+   subject_time        string, e.g. "10:24"
+   subject_battery     0..100 (turns red at or below #battery_low_level)
+-->
+<component>
+	<api>
+		<prop name="title" type="string" default="Budgie" />
+	</api>
+
+	<!-- Editor-only: preview at the target display width so width="100%" resolves to 480 -->
+	<previews>
+		<preview
+			name="display_480"
+			width="480"
+			height="64"
+			style_bg_color="#color_bg"
+			style_bg_opa="255"
+			style_pad_all="0"
+		/>
+	</previews>
+
+	<styles>
+		<style name="style_clear" bg_opa="0" border_width="0" pad_all="0" radius="0" />
+		<style
+			name="style_row"
+			layout="flex"
+			flex_flow="row"
+			flex_main_place="center"
+			flex_cross_place="center"
+			flex_track_place="center"
+		/>
+		<!-- Battery fill: a plain bar placed at an exact offset inside the frame image.
+		     Frame (31x18): 2px outline, interior x2..25 / y2..15, nub at x28..30.
+		     Fill sits at x4 y4, 20x10 -> 2px gap to the outline on every side. -->
+		<style name="style_battery_track" bg_opa="0" border_width="0" pad_all="0" radius="0" anim_duration="0" />
+		<style name="style_battery_fill" bg_opa="255" bg_color="#color_icon" radius="1" />
+		<style name="style_battery_fill_low" bg_color="#color_battery_low" />
+	</styles>
+
+	<view extends="lv_obj" width="100%" height="64" scrollable="false" style_pad_hor="20">
+		<style name="style_clear" />
+
+		<!-- Left: wifi | time -->
+		<lv_obj name="left" width="content" height="content" align="left_mid" style_pad_column="12" scrollable="false">
+			<style name="style_clear" />
+			<style name="style_row" />
+
+			<!-- Wifi: one pre-rendered image per level, only the matching one is shown -->
+			<lv_obj name="wifi" width="28" height="20" scrollable="false" clickable="false">
+				<style name="style_clear" />
+				<lv_image src="img_wifi_0">
+					<bind_flag_if_not_eq subject="subject_wifi_level" flag="hidden" ref_value="0" />
+				</lv_image>
+				<lv_image src="img_wifi_1">
+					<bind_flag_if_not_eq subject="subject_wifi_level" flag="hidden" ref_value="1" />
+				</lv_image>
+				<lv_image src="img_wifi_2">
+					<bind_flag_if_not_eq subject="subject_wifi_level" flag="hidden" ref_value="2" />
+				</lv_image>
+				<lv_image src="img_wifi_3">
+					<bind_flag_if_not_eq subject="subject_wifi_level" flag="hidden" ref_value="3" />
+				</lv_image>
+			</lv_obj>
+
+			<lv_obj
+				width="1"
+				height="26"
+				style_bg_opa="255"
+				style_bg_color="#color_divider"
+				style_border_width="0"
+				style_radius="0"
+			/>
+
+			<lv_label bind_text="subject_time">
+				<style name="style_status_text" />
+			</lv_label>
+		</lv_obj>
+
+		<!-- Center: brand -->
+		<lv_obj name="brand" width="content" height="content" align="center" style_pad_column="10" scrollable="false">
+			<style name="style_clear" />
+			<style name="style_row" />
+			<lv_label name="title_label" text="$title" style_text_font="font_title" style_text_color="#color_text" />
+		</lv_obj>
+
+		<!-- Right: battery with fill bar + percentage | settings -->
+		<lv_obj
+			name="right"
+			width="content"
+			height="content"
+			align="right_mid"
+			style_pad_column="12"
+			scrollable="false"
+		>
+			<style name="style_clear" />
+			<style name="style_row" />
+
+			<!-- Battery: frame image with the live fill bar pinned inside it; "checked" turns the fill red when low -->
+			<lv_obj name="battery" width="31" height="18" scrollable="false" clickable="false">
+				<style name="style_clear" />
+				<lv_image src="img_battery_frame" x="0" y="0" />
+				<lv_bar
+					name="battery_fill"
+					x="4"
+					y="4"
+					width="20"
+					height="10"
+					min_value="0"
+					max_value="100"
+					bind_value="subject_battery"
+				>
+					<!-- No <remove_style_all/> here: it runs after the attributes and wipes x/y/width/height, so the bar falls back to its 260x13 default -->
+					<style name="style_battery_track" />
+					<style name="style_battery_fill" selector="indicator" />
+					<style name="style_battery_fill_low" selector="indicator|checked" />
+					<bind_state_if_le subject="subject_battery" state="checked" ref_value="#battery_low_level" />
+				</lv_bar>
+			</lv_obj>
+
+			<lv_label bind_text="subject_battery" bind_text-fmt="%d%%">
+				<style name="style_status_text" />
+			</lv_label>
+
+			<lv_obj
+				width="1"
+				height="26"
+				style_bg_opa="255"
+				style_bg_color="#color_divider"
+				style_border_width="0"
+				style_radius="0"
+			/>
+
+			<!-- Settings: 24px gear with a 10px extra touch area on every side (44x44 hit target) -->
+			<lv_image name="settings" src="img_icon_settings" clickable="true" ext_click_area="10">
+				<screen_create_event screen="settings" anim_type="move_left" duration="250" />
+			</lv_image>
+		</lv_obj>
+	</view>
+</component>

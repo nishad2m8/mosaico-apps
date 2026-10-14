@@ -1,0 +1,26 @@
+<!--
+ @title Settings row
+ @brief Title + description on the left; whatever is placed inside the row (a switch, a value label...)
+        lines up on the right.
+-->
+<component>
+	<api>
+		<prop name="title" type="string" default="Setting"/>
+		<prop name="subtitle" type="string" default="What this setting does"/>
+	</api>
+
+	<previews>
+		<preview name="light" width="448" height="100" style_bg_color="#color_card" style_bg_opa="255" style_pad_all="0"/>
+	</previews>
+
+	<view extends="lv_obj" width="100%" height="content" scrollable="false"
+		style_bg_opa="0" style_border_width="0" style_radius="0" style_pad_hor="16" style_pad_ver="14" style_pad_column="12"
+		style_layout="flex" style_flex_flow="row" style_flex_cross_place="center">
+		<lv_obj name="labels" flex_grow="1" height="content" scrollable="false" clickable="false"
+			style_bg_opa="0" style_border_width="0" style_pad_all="0" style_pad_row="2"
+			style_layout="flex" style_flex_flow="column">
+			<lv_label name="title_label" text="$title" style_text_font="font_row_title" style_text_color="#color_text"/>
+			<lv_label name="subtitle_label" text="$subtitle" width="100%" long_mode="wrap" style_text_font="font_body" style_text_color="#color_muted"/>
+		</lv_obj>
+	</view>
+</component>

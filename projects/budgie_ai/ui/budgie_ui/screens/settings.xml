@@ -1,0 +1,173 @@
+<!--
+ @title Settings
+ @brief Sound, display (incl. 12/24 hr clock), assistant, device and support settings in a scrolling list of cards.
+        Support opens a popup with a QR code for https://buymeacoffee.com/nishad2m8.
+        Every control is bound to a subject in globals.xml; the app reads those to apply the settings.
+        Created when opened from the status bar gear and deleted on the way back (values live in the subjects).
+-->
+<screen>
+	<styles>
+		<style name="style_icon_btn" radius="999" pad_all="0" bg_opa="0" border_width="0" shadow_width="0" outline_width="0"/>
+		<style name="style_icon_btn_pressed" bg_opa="255" bg_color="#color_key_pressed"/>
+		<style name="style_info_value" text_font="font_row_title" text_color="#color_muted"/>
+		<style name="style_danger_btn" radius="999" pad_hor="16" pad_ver="10" bg_opa="255" bg_color="#color_card"
+			border_width="1" border_color="#color_danger" shadow_width="0" outline_width="0"
+			text_font="font_row_title" text_color="#color_danger"/>
+		<style name="style_danger_btn_pressed" bg_color="0xfdeeee"/>
+		<style name="style_danger_btn_disabled" border_color="#color_track" text_color="#color_muted"/>
+		<style name="style_support_btn" radius="999" pad_hor="18" pad_ver="10" border_width="0" outline_width="0"
+			bg_opa="255" bg_color="#color_btn_start" bg_grad_color="#color_btn_end" bg_grad_dir="hor"
+			shadow_width="10" shadow_opa="70" shadow_color="#color_btn_start" shadow_offset_y="2"
+			text_font="font_row_title" text_color="0xffffff"/>
+		<style name="style_support_btn_pressed" opa="220" shadow_opa="20"/>
+	</styles>
+
+	<view style_bg_color="#color_bg" style_bg_opa="255" style_pad_all="0" scrollable="false">
+		<!-- Header: back to home + title (same as the chat screen) -->
+		<lv_button name="back_btn" width="44" height="44" x="8" y="6" ext_click_area="6">
+			<style name="style_icon_btn"/>
+			<style name="style_icon_btn_pressed" selector="pressed"/>
+			<lv_image src="img_icon_back" align="center"/>
+			<subject_set_int_event subject="subject_show_support" value="0"/>
+			<screen_load_event screen="home" anim_type="move_right" duration="250"/>
+		</lv_button>
+		<lv_label text="Settings" align="top_mid" y="16" style_text_font="font_status" style_text_color="#color_text"/>
+
+		<!-- Scrolling list of sections -->
+		<lv_obj name="list" y="56" width="100%" height="424" scrollbar_mode="auto"
+			style_bg_opa="0" style_border_width="0" style_radius="0"
+			style_pad_hor="16" style_pad_top="4" style_pad_bottom="24" style_pad_row="8"
+			style_layout="flex" style_flex_flow="column">
+
+			<!-- SOUND -->
+			<lv_label text="SOUND"><style name="style_section_title"/></lv_label>
+			<lv_obj name="sound_card" width="100%" height="content" scrollable="false" style_margin_bottom="12">
+				<style name="style_settings_card"/>
+				<settings_slider title="Volume" subject="subject_volume"/>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_row title="Chirp sounds" subtitle="Little bird sounds on taps and replies">
+					<lv_switch width="52" height="30" bind_checked="subject_chirps">
+						<style name="style_switch_track" selector="main"/>
+						<style name="style_switch_on" selector="indicator|checked"/>
+						<style name="style_switch_knob" selector="knob"/>
+					</lv_switch>
+				</settings_row>
+			</lv_obj>
+
+			<!-- DISPLAY -->
+			<lv_label text="DISPLAY"><style name="style_section_title"/></lv_label>
+			<lv_obj name="display_card" width="100%" height="content" scrollable="false" style_margin_bottom="12">
+				<style name="style_settings_card"/>
+				<settings_slider title="Brightness" subject="subject_brightness" min="10"/>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_choice title="Screen off after" subtitle="Dims the screen when Budgie is idle">
+					<settings_option text="30s" subject="subject_screen_timeout" value="0"/>
+					<settings_option text="1m" subject="subject_screen_timeout" value="1"/>
+					<settings_option text="5m" subject="subject_screen_timeout" value="2"/>
+					<settings_option text="Never" subject="subject_screen_timeout" value="3"/>
+				</settings_choice>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_choice title="Time format" subtitle="Clock in the status bar">
+					<settings_option text="12 hr" subject="subject_clock_format" value="0"/>
+					<settings_option text="24 hr" subject="subject_clock_format" value="1"/>
+				</settings_choice>
+			</lv_obj>
+
+			<!-- ASSISTANT -->
+			<lv_label text="ASSISTANT"><style name="style_section_title"/></lv_label>
+			<lv_obj name="assistant_card" width="100%" height="content" scrollable="false" style_margin_bottom="12">
+				<style name="style_settings_card"/>
+				<settings_row title="Kid-safe answers" subtitle="Simpler, family-friendly replies">
+					<lv_switch width="52" height="30" bind_checked="subject_kid_safe">
+						<style name="style_switch_track" selector="main"/>
+						<style name="style_switch_on" selector="indicator|checked"/>
+						<style name="style_switch_knob" selector="knob"/>
+					</lv_switch>
+				</settings_row>
+			</lv_obj>
+
+			<!-- DEVICE -->
+			<lv_label text="DEVICE"><style name="style_section_title"/></lv_label>
+			<lv_obj name="device_card" width="100%" height="content" scrollable="false" style_margin_bottom="12">
+				<style name="style_settings_card"/>
+				<settings_row title="Wi-Fi" subtitle="Connected network">
+					<lv_label bind_text="subject_wifi_name"><style name="style_info_value"/></lv_label>
+				</settings_row>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_row title="Web setup" subtitle="Open this address in a browser">
+					<lv_label bind_text="subject_web_url"><style name="style_info_value"/></lv_label>
+				</settings_row>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_row title="Battery" subtitle="Charge level">
+					<lv_label bind_text="subject_battery" bind_text-fmt="%d%%"><style name="style_info_value"/></lv_label>
+				</settings_row>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_row title="Chat history" subtitle="Clear the conversation on the chat screen">
+					<lv_button name="clear_history_btn" width="content" height="content">
+						<style name="style_danger_btn"/>
+						<style name="style_danger_btn_pressed" selector="pressed"/>
+						<style name="style_danger_btn_disabled" selector="disabled"/>
+						<lv_label name="clear_history_label" text="Clear"/>
+						<event_cb callback="settings_clear_history_cb" trigger="clicked"/>
+					</lv_button>
+				</settings_row>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_row title="Power" subtitle="Turn Budgie off (the power key always works too)">
+					<lv_button name="power_off_btn" width="content" height="content">
+						<style name="style_danger_btn"/>
+						<style name="style_danger_btn_pressed" selector="pressed"/>
+						<lv_label name="power_off_label" text="Power off"/>
+						<event_cb callback="settings_power_off_cb" trigger="clicked"/>
+					</lv_button>
+				</settings_row>
+				<lv_obj width="100%" height="1"><style name="style_row_divider"/></lv_obj>
+				<settings_row title="About Budgie" subtitle="Software version">
+					<lv_label bind_text="subject_app_version" bind_text-fmt="v%s"><style name="style_info_value"/></lv_label>
+				</settings_row>
+			</lv_obj>
+
+			<!-- SUPPORT -->
+			<lv_label text="SUPPORT"><style name="style_section_title"/></lv_label>
+			<lv_obj name="support_card" width="100%" height="content" scrollable="false">
+				<style name="style_settings_card"/>
+				<settings_row title="Support Budgie" subtitle="Enjoying Budgie? Buy me a coffee">
+					<lv_button name="support_btn" width="content" height="content" click_focusable="false">
+						<style name="style_support_btn"/>
+						<style name="style_support_btn_pressed" selector="pressed"/>
+						<lv_label text="Support"/>
+						<subject_set_int_event subject="subject_show_support" value="1"/>
+					</lv_button>
+				</settings_row>
+			</lv_obj>
+
+			<!-- Footer -->
+			<lv_label name="credit" text="Created by nishad2m8" width="100%" style_text_align="center" style_margin_top="8"
+				style_text_font="font_body" style_text_color="#color_muted"/>
+		</lv_obj>
+
+		<!-- Support popup: QR code for the Buy Me a Coffee page. Tap outside the card or Close to dismiss. -->
+		<lv_obj name="support_overlay" width="100%" height="100%" scrollable="false"
+			style_bg_opa="150" style_bg_color="#color_text" style_border_width="0" style_radius="0" style_pad_all="0">
+			<bind_flag_if_not_eq subject="subject_show_support" flag="hidden" ref_value="1"/>
+			<subject_set_int_event subject="subject_show_support" value="0"/>
+
+			<lv_obj name="support_popup" width="300" height="content" align="center" scrollable="false"
+				style_radius="24" style_bg_opa="255" style_bg_color="#color_card" style_border_width="0"
+				style_pad_hor="24" style_pad_top="22" style_pad_bottom="20" style_pad_row="6"
+				style_shadow_width="40" style_shadow_opa="80" style_shadow_color="#color_text" style_shadow_offset_y="8"
+				style_layout="flex" style_flex_flow="column" style_flex_cross_place="center">
+				<lv_label text="Support Budgie" style_text_font="font_status" style_text_color="#color_text"/>
+				<lv_label text="Scan to buy me a coffee" style_text_font="font_body" style_text_color="#color_muted" style_margin_bottom="10"/>
+				<lv_qrcode name="support_qr" size="180" quiet_zone="true" dark_color="#color_text" light_color="0xffffff"
+					data="https://buymeacoffee.com/nishad2m8"/>
+				<lv_label text="buymeacoffee.com/nishad2m8" style_text_font="font_key_digit" style_text_color="#color_muted" style_margin_top="6"/>
+				<lv_button name="support_close_btn" width="100%" height="44" click_focusable="false" style_margin_top="12">
+					<style name="style_support_btn"/>
+					<style name="style_support_btn_pressed" selector="pressed"/>
+					<lv_label text="Close" align="center"/>
+					<subject_set_int_event subject="subject_show_support" value="0"/>
+				</lv_button>
+			</lv_obj>
+		</lv_obj>
+	</view>
+</screen>

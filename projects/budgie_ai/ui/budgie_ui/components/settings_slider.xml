@@ -1,0 +1,34 @@
+<!--
+ @title Settings slider
+ @brief Title with the live value on the right, and a full-width slider bound to a subject below.
+-->
+<component>
+	<api>
+		<prop name="title" type="string" default="Volume"/>
+		<prop name="subject" type="subject" default="subject_volume"/>
+		<prop name="fmt" type="string" default="%d%%"/>
+		<prop name="min" type="int" default="0"/>
+		<prop name="max" type="int" default="100"/>
+	</api>
+
+	<previews>
+		<preview name="light" width="448" height="100" style_bg_color="#color_card" style_bg_opa="255" style_pad_all="0"/>
+	</previews>
+
+	<view extends="lv_obj" width="100%" height="content" scrollable="false"
+		style_bg_opa="0" style_border_width="0" style_radius="0" style_pad_hor="16" style_pad_top="14" style_pad_bottom="20" style_pad_row="14"
+		style_layout="flex" style_flex_flow="column">
+		<lv_obj name="header" width="100%" height="content" scrollable="false" clickable="false"
+			style_bg_opa="0" style_border_width="0" style_pad_all="0" style_layout="flex" style_flex_flow="row">
+			<lv_label name="title_label" text="$title" flex_grow="1" style_text_font="font_row_title" style_text_color="#color_text"/>
+			<lv_label name="value_label" bind_text="$subject" bind_text-fmt="$fmt" style_text_font="font_row_title" style_text_color="#color_btn_start"/>
+		</lv_obj>
+		<!-- Inset 10px each side so the knob (22px) is not clipped at the ends -->
+		<lv_slider name="slider" width="100%" height="8" min_value="$min" max_value="$max" bind_value="$subject"
+			style_margin_left="10" style_margin_right="10" ext_click_area="12">
+			<style name="style_slider_track" selector="main"/>
+			<style name="style_slider_fill" selector="indicator"/>
+			<style name="style_slider_knob" selector="knob"/>
+		</lv_slider>
+	</view>
+</component>

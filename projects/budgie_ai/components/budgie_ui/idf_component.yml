@@ -1,0 +1,4 @@
+dependencies:
+  idf: ">=6.0"
+  # LVGL Pro project version (ui/budgie_ui/project.xml) and BSP display adapter.
+  lvgl/lvgl: "==9.5.0"

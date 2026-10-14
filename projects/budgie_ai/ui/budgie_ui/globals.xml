@@ -1,0 +1,132 @@
+<globals>
+    <api>
+        <!-- Add <enumdefs> here -->
+    </api>
+
+    <consts>
+        <color name="color_bg" value="0xf3f5fa" help="Screen background"/>
+        <color name="color_text" value="0x0f1f3d" help="Primary text (brand title)"/>
+        <color name="color_icon" value="0x4a5578" help="Status icons and status text"/>
+        <color name="color_muted" value="0x6b7590" help="Secondary text"/>
+        <color name="color_divider" value="0xd5dae5" help="Thin separators"/>
+        <color name="color_icon_dim" value="0xccd2de" help="Inactive wifi bars"/>
+        <color name="color_battery_low" value="0xe5484d" help="Battery fill when low"/>
+        <color name="color_btn_start" value="0x5b7ff5" help="Round action button gradient, left (blue)"/>
+        <color name="color_btn_end" value="0x5fd0c2" help="Round action button gradient, right (teal)"/>
+        <color name="color_btn_halo" value="0xdde6fb" help="Soft ring around the round action buttons"/>
+        <color name="color_bubble_bg" value="0xf8faff" help="Speech bubble fill"/>
+        <color name="color_bubble_border" value="0xc9d6f2" help="Speech bubble outline"/>
+        <color name="color_card" value="0xffffff" help="Cards, keys and input fields"/>
+        <color name="color_key_pressed" value="0xe6eaf2" help="Keypad key while pressed"/>
+        <color name="color_key_fn" value="0xeaeff9" help="Keypad function key background"/>
+        <color name="color_cam_bg" value="0x0e1424" help="Camera screen background"/>
+        <color name="color_cam_overlay" value="0x1c2438" help="Camera screen round buttons"/>
+        <color name="color_disabled" value="0x8a93ab" help="Disabled button fill"/>
+        <color name="color_track" value="0xe3e8f3" help="Slider / switch / segmented control track"/>
+        <color name="color_danger" value="0xd64545" help="Destructive actions (clear history)"/>
+        <color name="color_danger_halo" value="0xf7dada" help="Soft ring around the red Clear button"/>
+
+        <int name="battery_low_level" value="20" help="At or below this % the battery turns red"/>
+
+        <!-- Values of subject_budgie_mode -->
+        <int name="mode_idle" value="0"/>
+        <int name="mode_listening" value="1"/>
+        <int name="mode_thinking" value="2"/>
+        <int name="mode_talking" value="3"/>
+        <int name="mode_recorded" value="4" help="Recording stopped and held: mic shows Send, red Clear appears"/>
+
+        <!-- Values of subject_camera_origin -->
+        <int name="origin_home" value="0"/>
+        <int name="origin_chat" value="1"/>
+    </consts>
+
+    <subjects>
+        <int name="subject_wifi_level" value="3" min_value="0" max_value="3" help="Wifi signal: 0 = none, 1..3 bars"/>
+        <int name="subject_battery" value="78" min_value="0" max_value="100" help="Battery charge in %"/>
+        <string name="subject_time" value="10:24" help="Clock text shown in the status bar"/>
+        <int name="subject_budgie_mode" value="0" min_value="0" max_value="4" help="0 idle, 1 listening, 2 thinking, 3 talking, 4 recorded (tap to send)"/>
+        <int name="subject_photo_taken" value="0" min_value="0" max_value="1" help="Camera: 1 once a photo is captured (enables Send)"/>
+        <int name="subject_camera_origin" value="0" min_value="0" max_value="1" help="Screen the camera was opened from: 0 home, 1 chat (where Back/Send return to)"/>
+        <int name="subject_chat_has_photo" value="0" min_value="0" max_value="1" help="Chat: 1 while a photo is attached to the message"/>
+
+        <!-- Settings (read and apply these in the app) -->
+        <int name="subject_volume" value="70" min_value="0" max_value="100" help="Speaker volume in %"/>
+        <int name="subject_chirps" value="1" min_value="0" max_value="1" help="1: play chirp sounds on taps and replies"/>
+        <int name="subject_brightness" value="80" min_value="10" max_value="100" help="Backlight brightness in %"/>
+        <int name="subject_screen_timeout" value="1" min_value="0" max_value="3" help="Screen off after: 0 = 30 s, 1 = 1 min, 2 = 5 min, 3 = never"/>
+        <int name="subject_clock_format" value="1" min_value="0" max_value="1" help="Status bar clock: 0 = 12 hr, 1 = 24 hr"/>
+        <int name="subject_kid_safe" value="0" min_value="0" max_value="1" help="1: simpler, family-friendly answers"/>
+        <string name="subject_wifi_name" value="HomeNet" help="Connected Wi-Fi network name"/>
+        <string name="subject_web_url" value="192.168.4.1" help="Address of the web setup page"/>
+        <string name="subject_app_version" value="1.0.0" help="Software version shown in Settings"/>
+        <int name="subject_show_support" value="0" min_value="0" max_value="1" help="Settings: 1 while the support QR popup is open"/>
+    </subjects>
+
+    <images>
+        <data name="img_wifi_0" src_path="images/wifi_0.png" color_format="argb8888"/>
+        <data name="img_wifi_1" src_path="images/wifi_1.png" color_format="argb8888"/>
+        <data name="img_wifi_2" src_path="images/wifi_2.png" color_format="argb8888"/>
+        <data name="img_wifi_3" src_path="images/wifi_3.png" color_format="argb8888"/>
+        <data name="img_battery_frame" src_path="images/battery_frame.png" color_format="argb8888"/>
+        <data name="img_budgie_idle" src_path="images/budgie_idle.png" color_format="argb8888"/>
+        <data name="img_budgie_listening" src_path="images/budgie_listening.png" color_format="argb8888"/>
+        <data name="img_budgie_thinking" src_path="images/budgie_thinking.png" color_format="argb8888"/>
+        <data name="img_budgie_talking" src_path="images/budgie_talking.png" color_format="argb8888"/>
+        <data name="img_budgie_avatar" src_path="images/budgie_avatar.png" color_format="argb8888"/>
+        <data name="img_icon_mic" src_path="images/icon_mic.png" color_format="argb8888"/>
+        <data name="img_icon_camera" src_path="images/icon_camera.png" color_format="argb8888"/>
+        <data name="img_icon_keyboard" src_path="images/icon_keyboard.png" color_format="argb8888"/>
+        <data name="img_icon_settings" src_path="images/icon_settings.png" color_format="argb8888"/>
+        <data name="img_icon_back" src_path="images/icon_back.png" color_format="argb8888"/>
+        <data name="img_icon_back_light" src_path="images/icon_back_light.png" color_format="argb8888"/>
+        <data name="img_icon_photo" src_path="images/icon_photo.png" color_format="argb8888"/>
+        <data name="img_icon_camera_small" src_path="images/icon_camera_small.png" color_format="argb8888"/>
+        <data name="img_icon_close_small" src_path="images/icon_close_small.png" color_format="argb8888"/>
+        <data name="img_icon_backspace" src_path="images/icon_backspace.png" color_format="argb8888"/>
+        <data name="img_icon_close" src_path="images/icon_close.png" color_format="argb8888"/>
+        <data name="img_icon_send" src_path="images/icon_send.png" color_format="argb8888"/>
+        <data name="img_icon_send_large" src_path="images/icon_send_large.png" color_format="argb8888"/>
+    </images>
+
+    <fonts>
+        <bin name="font_title" src_path="fonts/Inter-700.ttf" size="34" bpp="4" as_file="false" range="0x20-0x7f"/>
+        <bin name="font_status" src_path="fonts/Inter-500.ttf" size="20" bpp="4" as_file="false" range="0x20-0x7f"/>
+        <bin name="font_body" src_path="fonts/Inter-400.ttf" size="16" bpp="4" as_file="false" range="0x20-0x7f"/>
+        <bin name="font_bubble_title" src_path="fonts/Inter-700.ttf" size="20" bpp="4" as_file="false" range="0x20-0x7f"/>
+        <bin name="font_bubble_text" src_path="fonts/Inter-400.ttf" size="18" bpp="4" as_file="false" range="0x20-0x7f"/>
+        <bin name="font_key_digit" src_path="fonts/Inter-500.ttf" size="13" bpp="4" as_file="false" range="0x20-0x7f"/>
+        <bin name="font_row_title" src_path="fonts/Inter-500.ttf" size="18" bpp="4" as_file="false" range="0x20-0x7f"/>
+    </fonts>
+
+    <styles>
+        <style name="style_status_text" text_font="font_status" text_color="#color_icon"/>
+
+        <!-- Round action button: blue->teal gradient disc, soft light ring, white icon on top.
+             radius 999 keeps any size fully round. -->
+        <style name="style_round_btn" radius="999" pad_all="0" border_width="0"
+            bg_opa="255" bg_color="#color_btn_start" bg_grad_color="#color_btn_end" bg_grad_dir="hor"
+            outline_width="8" outline_pad="0" outline_color="#color_btn_halo" outline_opa="200"
+            shadow_width="24" shadow_offset_y="6" shadow_color="#color_btn_start" shadow_opa="60"/>
+        <style name="style_round_btn_pressed" opa="220" shadow_opa="20"/>
+        <!-- Keypad keys (chat screen) -->
+        <style name="style_key" radius="14" pad_all="0" bg_opa="255" bg_color="#color_card"
+            border_width="1" border_color="#color_bubble_border" shadow_width="0" outline_width="0"/>
+        <style name="style_key_pressed" bg_color="#color_key_pressed"/>
+        <!-- Function keys (backspace, case, 123, clear): tinted so they read as controls, not letters -->
+        <style name="style_key_fn" bg_color="#color_key_fn"/>
+        <!-- Settings controls -->
+        <style name="style_settings_card" radius="20" pad_all="0" bg_opa="255" bg_color="#color_card"
+            border_width="1" border_color="#color_bubble_border" layout="flex" flex_flow="column"/>
+        <style name="style_section_title" text_font="font_key_digit" text_color="#color_muted" text_letter_space="1" pad_left="8"/>
+        <style name="style_row_divider" bg_opa="255" bg_color="#color_track" border_width="0" radius="0" pad_all="0"/>
+        <style name="style_switch_track" bg_opa="255" bg_color="#color_track" radius="999" border_width="0"/>
+        <style name="style_switch_on" bg_opa="255" radius="999" bg_color="#color_btn_start" bg_grad_color="#color_btn_end" bg_grad_dir="hor"/>
+        <style name="style_switch_knob" bg_opa="255" bg_color="0xffffff" radius="999" pad_all="-3"
+            shadow_width="6" shadow_opa="50" shadow_color="#color_icon" shadow_offset_y="1"/>
+        <style name="style_slider_track" bg_opa="255" bg_color="#color_track" radius="999" border_width="0" pad_all="0"/>
+        <style name="style_slider_fill" bg_opa="255" bg_color="#color_btn_start" bg_grad_color="#color_btn_end" bg_grad_dir="hor" radius="999"/>
+        <style name="style_slider_knob" bg_opa="255" bg_color="0xffffff" radius="999" pad_all="7"
+            border_width="2" border_color="#color_btn_start" shadow_width="8" shadow_opa="50" shadow_color="#color_btn_start"/>
+        <style name="style_round_btn_disabled" bg_color="#color_disabled" bg_grad_color="#color_disabled" shadow_opa="0" outline_opa="60" opa="160"/>
+    </styles>
+</globals>

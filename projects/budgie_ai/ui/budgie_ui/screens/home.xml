@@ -1,0 +1,180 @@
+<!--
+ @title Home
+ @brief Budgie home screen: status bar, the budgie in its current mode with a matching speech bubble,
+        and keyboard | mic | camera buttons below.
+
+ subject_budgie_mode drives the pose, the bubble and the mic button:
+   0 idle, 1 listening, 2 thinking, 3 talking, 4 recorded (see the mode_* consts in globals.xml).
+ The app sets it from C (main/app_ui.c). Mic flow: mic -> Stop (listening) -> Send + red Clear (recorded).
+ home_mic_cb starts / stops (holds) / sends the recording; home_clear_cb discards it.
+ Permanent so the chat and camera screens can return to it with screen_load_event.
+ Chat is permanent too (it keeps the typed message while the camera is open), so it is loaded, not created.
+-->
+<screen permanent="true">
+	<styles>
+		<!-- Mic while listening: wider teal ring -->
+		<style name="style_mic_live" outline_width="14" outline_color="#color_btn_end" outline_opa="110" />
+		<!-- Clear (discard the held recording): red version of style_round_btn -->
+		<style
+			name="style_clear_btn"
+			bg_color="#color_danger"
+			bg_grad_color="#color_danger"
+			outline_width="4"
+			outline_color="#color_danger_halo"
+			shadow_width="12"
+			shadow_offset_y="3"
+			shadow_color="#color_danger"
+		/>
+	</styles>
+
+	<view style_bg_color="#color_bg" style_bg_opa="255" style_pad_all="0" scrollable="false">
+		<status_bar align="top_mid" />
+
+		<!-- Subtitle under the status bar; the app sets it from the web page's Subtitle setting -->
+		<lv_label name="subtitle_label" text="Personal AI Assistant" align="top_mid" y="62" style_text_font="font_body" style_text_color="#color_muted" />
+
+		<!-- Budgie poses (229x224, all on the same canvas so they line up); only the current mode's pose is shown -->
+		<lv_image name="budgie_idle" src="img_budgie_idle" align="top_mid" x="-20" y="104">
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_idle" />
+		</lv_image>
+		<lv_image name="budgie_listening" src="img_budgie_listening" align="top_mid" x="-20" y="104">
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_listening" />
+		</lv_image>
+		<lv_image name="budgie_thinking" src="img_budgie_thinking" align="top_mid" x="-20" y="104">
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_thinking" />
+		</lv_image>
+		<lv_image name="budgie_talking" src="img_budgie_talking" align="top_mid" x="-20" y="104">
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_talking" />
+		</lv_image>
+		<lv_image name="budgie_recorded" src="img_budgie_idle" align="top_mid" x="-20" y="104">
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_recorded" />
+		</lv_image>
+
+		<!-- One bubble per mode over the lower half of the budgie; the tail adds 10px on top, so the body starts at y=248.
+		     The talking bubble's labels ("title_label", "text_label") are filled in by the app with the reply. -->
+		<speech_bubble
+			name="bubble_idle"
+			align="top_mid"
+			y="238"
+			title="Hi! I'm Budgie."
+			text="How can I help you today?"
+		>
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_idle" />
+		</speech_bubble>
+		<speech_bubble
+			name="bubble_listening"
+			align="top_mid"
+			y="238"
+			title="I'm listening..."
+			text="Go ahead, ask me anything."
+		>
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_listening" />
+		</speech_bubble>
+		<speech_bubble
+			name="bubble_thinking"
+			align="top_mid"
+			y="238"
+			title="Hmm, let me think..."
+			text="One moment please."
+		>
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_thinking" />
+		</speech_bubble>
+		<speech_bubble
+			name="bubble_talking"
+			align="top_mid"
+			y="238"
+			title="Here's what I think!"
+			text="Tap the mic to ask more."
+		>
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_talking" />
+		</speech_bubble>
+		<speech_bubble name="bubble_recorded" align="top_mid" y="238" title="Got it!" text="Tap to send">
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_recorded" />
+		</speech_bubble>
+		<!-- Red Clear on the bubble's arrow (tail centre: x=162, y=248), only while a recording is held; discards it -->
+		<lv_button name="clear_btn" width="40" height="40" x="142" y="228" ext_click_area="6">
+			<style name="style_round_btn" />
+			<style name="style_clear_btn" />
+			<style name="style_round_btn_pressed" selector="pressed" />
+			<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_recorded" />
+			<lv_image src="img_icon_close" align="center" />
+			<event_cb callback="home_clear_cb" trigger="clicked" />
+		</lv_button>
+
+		<!-- Keyboard | mic | camera. The mic is the main action (84px), the sides are 64px; all have an 8px ring.
+		     The row is padded 16px so the rings and shadows are not clipped; y=336 puts the mic disc at y=352. -->
+		<lv_obj
+			name="actions"
+			width="content"
+			height="content"
+			align="top_mid"
+			y="336"
+			scrollable="false"
+			style_bg_opa="0"
+			style_border_width="0"
+			style_pad_all="16"
+			style_layout="flex"
+			style_flex_flow="row"
+			style_flex_cross_place="center"
+			style_pad_column="40"
+		>
+			<lv_button name="keyboard_btn" width="64" height="64">
+				<style name="style_round_btn" />
+				<style name="style_round_btn_pressed" selector="pressed" />
+				<lv_image src="img_icon_keyboard" align="center" />
+				<screen_load_event screen="chat" anim_type="move_left" duration="250" />
+			</lv_button>
+			<lv_button name="mic_btn" width="84" height="84">
+				<style name="style_round_btn" />
+				<style name="style_round_btn_pressed" selector="pressed" />
+				<bind_style name="style_mic_live" subject="subject_budgie_mode" ref_value="#mode_listening" />
+				<!-- Mic icon, swapped for a stop square while listening and a send arrow once recorded -->
+				<!-- Two bindings on one flag fight (the last update wins), so the mic is hidden in two layers -->
+				<lv_obj
+					name="mic_icon"
+					width="40"
+					height="40"
+					align="center"
+					clickable="false"
+					scrollable="false"
+					style_bg_opa="0"
+					style_border_width="0"
+					style_pad_all="0"
+					style_radius="0"
+				>
+					<bind_flag_if_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_listening" />
+					<lv_image src="img_icon_mic" align="center">
+						<bind_flag_if_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_recorded" />
+					</lv_image>
+				</lv_obj>
+				<lv_image name="send" src="img_icon_send_large" align="center">
+					<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_recorded" />
+				</lv_image>
+				<lv_obj
+					name="stop"
+					width="24"
+					height="24"
+					align="center"
+					clickable="false"
+					scrollable="false"
+					style_bg_opa="255"
+					style_bg_color="0xffffff"
+					style_border_width="0"
+					style_radius="6"
+				>
+					<bind_flag_if_not_eq subject="subject_budgie_mode" flag="hidden" ref_value="#mode_listening" />
+				</lv_obj>
+				<!-- Tap to start listening, Stop to hold the recording, Send to ask. Implemented in main/main.c -->
+				<event_cb callback="home_mic_cb" trigger="clicked" />
+			</lv_button>
+			<lv_button name="camera_btn" width="64" height="64">
+				<style name="style_round_btn" />
+				<style name="style_round_btn_pressed" selector="pressed" />
+				<lv_image src="img_icon_camera" align="center" />
+				<subject_set_int_event subject="subject_photo_taken" value="0" />
+				<subject_set_int_event subject="subject_camera_origin" value="#origin_home" />
+				<screen_create_event screen="camera" anim_type="fade_in" duration="200" />
+			</lv_button>
+		</lv_obj>
+	</view>
+</screen>
