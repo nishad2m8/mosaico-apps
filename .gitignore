@@ -18,6 +18,3 @@ preview-build/
 preview-bin/
 .cache.json
 
-# Firmware packages go on GitHub Releases, not in git
-*.irisfw
-release/

@@ -18,7 +18,7 @@ package, Vibe Mode integration and the build scripts.
 
 ## Quick install (no build needed)
 
-Download the app's `.irisfw` file from [Releases](../../releases). Then, from
+Download the app's `.irisfw` file from the [`release/`](release) folder. Then, from
 the official workspace root (step 1 below), with the board connected by USB:
 
 ```sh

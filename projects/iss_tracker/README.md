@@ -19,7 +19,7 @@ where it is, where it has been, and where it is going next.
 From the workspace root, with the board connected by USB:
 
 ```sh
-# Option A: prebuilt firmware from Releases
+# Option A: prebuilt firmware from the repo's release/ folder
 python mosaico.py iris system-update --bundle iss_tracker-system-update.irisfw
 
 # Option B: build from source
